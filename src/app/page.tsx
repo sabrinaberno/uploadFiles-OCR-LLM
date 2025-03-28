@@ -8,37 +8,46 @@ import * as actions from "../actions";
 
 interface FormData {
   filename: string;
-  "file-upload": FileList;
 }
 
-
 export default function Home() {
-
   const [pdfUrl, setPdfUrl] = useState("");
+  const [file, setFile] = useState<File | null>(null);
   const { register, handleSubmit } = useForm<FormData>();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+    const selectedFile = e.target.files?.[0];
 
-    if (file) {
-      // Verificar se o arquivo é PDF
-      if (file.type !== "application/pdf") {
+    console.log({ selectedFile });
+    
+    if (selectedFile) {
+      if (selectedFile.type !== "application/pdf") {
         alert("Por favor, envie um arquivo PDF.");
-      } else {
-        // Se for PDF, simula o upload
+      } 
+      // if (selectedFile.size >) {
+      //   alert("Por favor, envie um arquivo PDF.");
+      // } 
+      else {
+        setFile(selectedFile);
       }
     }
   };
 
-  const onSubmit: SubmitHandler<FormData> = async (data) => {
-    const formData = new FormData();
-    formData.append("filename", data.filename);
-    formData.append("file-upload", data["file-upload"][0]);
+  const onSubmit: SubmitHandler<FormData> = async () => {
+    if (!file) {
+      alert("Por favor, selecione um arquivo antes de enviar.");
+      return;
+    }
   
+    console.log({ file });
+
+    const formData = new FormData();
+    formData.append("filename", file.name);
+    formData.append("file-upload", file); // Usando o estado correto
+
     // Chama a função de criação do arquivo no actions
     await actions.createFile(formData);
   };
-
 
   return (
     <div className="w-full max-w-3xl p-8 my-16 bg-white border border-gray-200 rounded-lg shadow mx-auto">
@@ -47,9 +56,9 @@ export default function Home() {
       </h2>
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="grid gap-4 sm:grid-cols-2 sm:gap-6">
-          <div className="sm:col-span-2">
+          {/* <div className="sm:col-span-2">
             <label
-              htmlFor="title"
+              htmlFor="filename"
               className="block text-sm font-medium leading-6 text-gray-900 mb-2"
             >
               Título do arquivo que será salvo
@@ -58,25 +67,24 @@ export default function Home() {
               <input
                 {...register("filename")}
                 type="text"
-                name="filename"
                 id="filename"
-                autoComplete="given-name"
+                autoComplete
                 className="block w-full rounded-md border-0 py-2 px-4 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-purple-600 sm:text-sm sm:leading-6"
                 placeholder="Escreva o título"
               />
             </div>
-          </div>
+          </div> */}
           <div className="col-span-full">
             <div className="flex justify-between items-center mb-4">
               <label
-                htmlFor="product-image"
+                htmlFor="file-upload"
                 className="block text-sm font-medium leading-6 text-gray-900"
               >
                 Clique para fazer o upload do arquivo
               </label>
-              {pdfUrl && (
+              {file && (
                 <button
-                  onClick={() => setPdfUrl("")}
+                  onClick={() => setFile(null)}
                   type="button"
                   className="flex space-x-2 bg-slate-900 rounded-md shadow text-slate-50 py-2 px-4"
                 >
@@ -85,32 +93,24 @@ export default function Home() {
                 </button>
               )}
             </div>
-            {pdfUrl ? (
-              <Image
-                src={pdfUrl}
-                alt="Product image"
-                width={1000}
-                height={667}
-                className="w-full h-64 object-cover"
+            <div className="flex justify-center items-center">
+              <label
+                htmlFor="file-upload"
+                className="w-full flex justify-center items-center p-4 bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 focus:ring-2 focus:ring-purple-600"
+              >
+                <Plus className="w-6 h-6 text-gray-500" />
+                <span className="ml-2 text-sm font-medium text-gray-700">
+                  {file ? file.name : "Upload do Arquivo"}
+                </span>
+              </label>
+              <input
+                id="file-upload"
+                type="file"
+                accept="application/pdf"
+                className="hidden"
+                onChange={handleFileChange}
               />
-            ) : (
-              <div className="flex justify-center items-center">
-                <label
-                  htmlFor="file-upload"
-                  className="w-full flex justify-center items-center p-4 bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 focus:ring-2 focus:ring-purple-600"
-                >
-                  <Plus className="w-6 h-6 text-gray-500" />
-                  <span className="ml-2 text-sm font-medium text-gray-700">Upload do Arquivo</span>
-                </label>
-                <input
-                  id="file-upload"
-                  type="file"
-                  accept="pdf/*"
-                  className="hidden"
-                  onChange={handleFileChange}
-                />
-              </div>
-            )}
+            </div>
           </div>
         </div>
         <button
@@ -122,25 +122,23 @@ export default function Home() {
         </button>
       </form>
       <div className="grid gap-4 sm:grid-cols-2 sm:gap-6 mt-8">
-          <div className="sm:col-span-2">
-            <label
-              htmlFor="title"
-              className="block text-sm font-medium leading-6 text-gray-900 mb-2"
-            >
-              Converse com o chat para tirar dúvidas sobre o seu documento
-            </label>
-            <div className="mt-2">
-              <input
-                {...register("filename")}
-                type="text"
-                name="chat"
-                id="chat"
-                className="block w-full rounded-md border-0 py-2 px-4 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-purple-600 sm:text-sm sm:leading-6"
-                placeholder="Escreva aqui"
-              />
-            </div>
+        <div className="sm:col-span-2">
+          <label
+            htmlFor="chat"
+            className="block text-sm font-medium leading-6 text-gray-900 mb-2"
+          >
+            Converse com o chat para tirar dúvidas sobre o seu documento
+          </label>
+          <div className="mt-2">
+            <input
+              type="text"
+              id="chat"
+              className="block w-full rounded-md border-0 py-2 px-4 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-purple-600 sm:text-sm sm:leading-6"
+              placeholder="Escreva aqui"
+            />
           </div>
         </div>
+      </div>
     </div>
   );
 }

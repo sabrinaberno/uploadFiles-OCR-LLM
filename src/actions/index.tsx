@@ -4,6 +4,7 @@ import { prisma } from "../utils/prisma";
 import { revalidatePath } from "next/cache";
 
   export async function createFile(formData: FormData) {
+    
     const file = formData.get("file-upload") as File;
     const filename = formData.get("filename") as string;
   
@@ -20,14 +21,14 @@ import { revalidatePath } from "next/cache";
   
     const base64Data = bufferData.toString('base64');
 
-    await prisma.file.create({
+    const result=await prisma.file.create({
       data: {
         filename: filename,
         data: base64Data,
         size: file.size,
       },
     });
-  
+  console.log({result})
     revalidatePath("/");
   }
   
