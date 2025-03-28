@@ -1,7 +1,6 @@
 "use client";
 
 import { Pencil, Plus } from "lucide-react";
-import Image from "next/image";
 import React, { useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import * as actions from "../actions";
@@ -11,9 +10,8 @@ interface FormData {
 }
 
 export default function Home() {
-  const [pdfUrl, setPdfUrl] = useState("");
   const [file, setFile] = useState<File | null>(null);
-  const { register, handleSubmit } = useForm<FormData>();
+  const { handleSubmit } = useForm<FormData>();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
@@ -55,25 +53,7 @@ export default function Home() {
         Chat w/ File Upload
       </h2>
       <form onSubmit={handleSubmit(onSubmit)}>
-        <div className="grid gap-4 sm:grid-cols-2 sm:gap-6">
-          {/* <div className="sm:col-span-2">
-            <label
-              htmlFor="filename"
-              className="block text-sm font-medium leading-6 text-gray-900 mb-2"
-            >
-              Título do arquivo que será salvo
-            </label>
-            <div className="mt-2">
-              <input
-                {...register("filename")}
-                type="text"
-                id="filename"
-                autoComplete
-                className="block w-full rounded-md border-0 py-2 px-4 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-purple-600 sm:text-sm sm:leading-6"
-                placeholder="Escreva o título"
-              />
-            </div>
-          </div> */}
+        <div className="grid gap-4 sm:grid-cols-2 sm:gap-6">  
           <div className="col-span-full">
             <div className="flex justify-between items-center mb-4">
               <label
