@@ -1,9 +1,10 @@
 "use client";
 
 import { Pencil, Plus } from "lucide-react";
-import React, { useState } from "react";
+import React, { useState,useRef,useEffect } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import * as actions from "../actions";
+import {createWorker} from "tesseract.js";
 
 interface FormData {
   filename: string;
@@ -12,20 +13,28 @@ interface FormData {
 export default function Home() {
   const [file, setFile] = useState<File | null>(null);
   const { handleSubmit } = useForm<FormData>();
+  const [ orcResult, setOcrResult ] = useState(''); 
+  //const [progress,setProgress]=useState('')
+  //const [progressLabel,setProgressLabel]=useState('')
+
+  const workerRef=useRef<Tesseract.worker|null>(null)
+
+  useEffect(()=>{
+    workerRef.current=createWorker('por+eng')
+    return ()=>{
+      workerRef.current?.terminate()
+      workerRef.current=null
+    }
+  },[])
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
 
-    console.log({ selectedFile });
-    
     if (selectedFile) {
-      if (selectedFile.type !== "application/pdf") {
-        alert("Por favor, envie um arquivo PDF.");
-      } 
-      // if (selectedFile.size >) {
-      //   alert("Por favor, envie um arquivo PDF.");
-      // } 
-      else {
+
+      if (selectedFile.size > 1_048_576) { // 1MB em bytes
+        alert("O arquivo deve ter no máximo 1MB.");
+      } else {
         setFile(selectedFile);
       }
     }
@@ -44,8 +53,20 @@ export default function Home() {
     formData.append("file-upload", file); // Usando o estado correto
 
     // Chama a função de criação do arquivo no actions
-    await actions.createFile(formData);
+    const bufferData = await actions.createFile(formData);
+    alert("Arquivo enviado!");
+    handleExtract(bufferData)
   };
+
+
+  const handleExtract = async (base64Data) => {
+    const worker=await workerRef.current;
+    console.log({worker:worker})
+
+    const response = await worker.recognize(base64Data)
+    console.log({'Ocr':response.data})
+    setOcrResult(response.data.text)
+  }
 
   return (
     <div className="w-full max-w-3xl p-8 my-16 bg-white border border-gray-200 rounded-lg shadow mx-auto">
@@ -86,22 +107,40 @@ export default function Home() {
               <input
                 id="file-upload"
                 type="file"
-                accept="application/pdf"
                 className="hidden"
+                multiple={false}
                 onChange={handleFileChange}
               />
             </div>
           </div>
         </div>
         <button
-          type="submit"
-          className="inline-flex items-center px-5 py-2.5 mt-4 sm:mt-6 text-sm font-medium text-center text-white bg-purple-700 rounded-lg focus:ring-4 focus:ring-purple-200 dark:focus:ring-purple-900 hover:bg-purple-800"
+           type="submit"
+           className={`inline-flex items-center px-5 py-2.5 mt-4 sm:mt-6 text-sm font-medium text-center rounded-lg focus:ring-4 focus:ring-purple-200 dark:focus:ring-purple-900 
+             ${file ? "text-white bg-purple-700 hover:bg-purple-800" : "text-gray-400 bg-gray-300 cursor-not-allowed"}`}
+           disabled={!file}
         >
           <Plus className="w-5 h-5 mr-2" />
-          <span>Save Product</span>
+          <span>Salvar Arquivo</span>
         </button>
       </form>
-      <div className="grid gap-4 sm:grid-cols-2 sm:gap-6 mt-8">
+      {orcResult && <div className="grid gap-4 sm:grid-cols-2 sm:gap-6 mt-8">
+
+        <div className="sm:col-span-2 text-sm font-medium leading-6 text-gray-900 ">
+          <label
+            htmlFor="chat"
+            className="block mb-2 "
+          >
+            Texto convertido com OCR:
+          </label>
+          <div className="mt-2" >
+            {orcResult}
+          </div>
+        </div>
+
+      </div> }
+
+      {orcResult && <div className="grid gap-4 sm:grid-cols-2 sm:gap-6 mt-8">
         <div className="sm:col-span-2">
           <label
             htmlFor="chat"
@@ -118,7 +157,7 @@ export default function Home() {
             />
           </div>
         </div>
-      </div>
+      </div> }
     </div>
   );
 }
