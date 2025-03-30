@@ -2,16 +2,18 @@
 
 import { prisma } from "../utils/prisma";
 
-export async function createBase64Data(file: File): Promise<string> {
-
-  // Convertendo o conteúdo do arquivo para Buffer
+export async function createbufferData(file: File): Promise<Buffer> {
   const fileData = await file.arrayBuffer();
-  const bufferData = Buffer.from(fileData,'base64');
-
-  // Convertendo o buffer para base64
-  //const base64Data = bufferData.toString('base64');
+  const bufferData = Buffer.from(fileData);
 
   return bufferData;
+}
+
+export async function createBase64Data (file: Buffer): Promise<string> {
+  
+  const base64Data = file.toString("base64");
+
+  return base64Data;
 }
 
 export async function createFile(formData: FormData) {
@@ -24,10 +26,10 @@ export async function createFile(formData: FormData) {
   }
 
   try {
-    // Chama a função createBase64Data para gerar a base64 do arquivo
-    const bufferData = await createBase64Data(file);
-    const base64Data=bufferData.toString('base64') 
-    // console.log(base64Data)
+    const bufferData = await createbufferData(file);
+
+    const base64Data = await createBase64Data(bufferData);
+
     console.log("Arquivo recebido", filename, file.size);
 
     // Armazena os dados do arquivo no banco de dados
@@ -39,7 +41,7 @@ export async function createFile(formData: FormData) {
       },
     });
 
-    return bufferData
+    return base64Data
 
   } catch (error) {
     console.error("Erro ao criar o arquivo:", error);

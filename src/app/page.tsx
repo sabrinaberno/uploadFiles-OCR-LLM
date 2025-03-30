@@ -1,72 +1,47 @@
 "use client";
 
 import { Pencil, Plus } from "lucide-react";
-import React, { useState,useRef,useEffect } from "react";
-import { useForm, SubmitHandler } from "react-hook-form";
-import * as actions from "../actions";
-import {createWorker} from "tesseract.js";
+import React, { useState } from "react";
+import { useForm} from "react-hook-form";
+import {useOcrWorker } from "../services/ocrService";
+import { createFile, createbufferData } from "../actions/fileActions";
+import FileUpload from "../components/FileUpload";
 
-interface FormData {
-  filename: string;
-}
 
 export default function Home() {
   const [file, setFile] = useState<File | null>(null);
-  const { handleSubmit } = useForm<FormData>();
+  const { handleSubmit } = useForm();
   const [ orcResult, setOcrResult ] = useState(''); 
+  const { initializeWorker, recognizeText, terminateWorker } = useOcrWorker();
+
   //const [progress,setProgress]=useState('')
   //const [progressLabel,setProgressLabel]=useState('')
 
-  const workerRef=useRef<Tesseract.worker|null>(null)
-
-  useEffect(()=>{
-    workerRef.current=createWorker('por+eng')
-    return ()=>{
-      workerRef.current?.terminate()
-      workerRef.current=null
-    }
-  },[])
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = e.target.files?.[0];
-
-    if (selectedFile) {
-
-      if (selectedFile.size > 1_048_576) { // 1MB em bytes
-        alert("O arquivo deve ter no máximo 1MB.");
-      } else {
-        setFile(selectedFile);
-      }
-    }
+  const handleFileSelect = (file: File) => {
+    setFile(file);
   };
 
-  const onSubmit: SubmitHandler<FormData> = async () => {
+  const onSubmit = async () => {
     if (!file) {
       alert("Por favor, selecione um arquivo antes de enviar.");
       return;
     }
-  
-    console.log({ file });
+    await initializeWorker();
 
     const formData = new FormData();
     formData.append("filename", file.name);
     formData.append("file-upload", file); // Usando o estado correto
 
-    // Chama a função de criação do arquivo no actions
-    const bufferData = await actions.createFile(formData);
+    const base64Data = await createbufferData(file);
+
+    const text = await recognizeText(base64Data);
+    setOcrResult(text);
+
+    await createFile(formData);
+    
     alert("Arquivo enviado!");
-    handleExtract(bufferData)
+    terminateWorker();
   };
-
-
-  const handleExtract = async (base64Data) => {
-    const worker=await workerRef.current;
-    console.log({worker:worker})
-
-    const response = await worker.recognize(base64Data)
-    console.log({'Ocr':response.data})
-    setOcrResult(response.data.text)
-  }
 
   return (
     <div className="w-full max-w-3xl p-8 my-16 bg-white border border-gray-200 rounded-lg shadow mx-auto">
@@ -104,13 +79,14 @@ export default function Home() {
                   {file ? file.name : "Upload do Arquivo"}
                 </span>
               </label>
-              <input
+              {/* <input
                 id="file-upload"
                 type="file"
                 className="hidden"
                 multiple={false}
-                onChange={handleFileChange}
-              />
+                //onChange={handleFileChange}
+              /> */}
+              <FileUpload onFileSelect={handleFileSelect} />
             </div>
           </div>
         </div>
@@ -125,7 +101,6 @@ export default function Home() {
         </button>
       </form>
       {orcResult && <div className="grid gap-4 sm:grid-cols-2 sm:gap-6 mt-8">
-
         <div className="sm:col-span-2 text-sm font-medium leading-6 text-gray-900 ">
           <label
             htmlFor="chat"
@@ -137,7 +112,6 @@ export default function Home() {
             {orcResult}
           </div>
         </div>
-
       </div> }
 
       {orcResult && <div className="grid gap-4 sm:grid-cols-2 sm:gap-6 mt-8">
