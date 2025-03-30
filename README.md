@@ -1,36 +1,89 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Guia de Instalação e Uso da Aplicação  
 
-## Getting Started
+Este tutorial descreve como configurar e executar a aplicação localmente, além de listar as funcionalidades já implementadas e as que ainda serão desenvolvidas.  
 
-First, run the development server:
+---
+
+## 🛠 Tecnologias Utilizadas  
+
+- **Next.js** (App Router + Server Actions)  
+- **TypeScript**  
+- **Prisma ORM**  
+- **MongoDB**  
+- **Tesseract.js** (OCR)  
+- **TailwindCSS**  
+- **Vercel** (Deploy)  
+
+---
+
+## 🚀 Como Instalar e Rodar o Projeto  
+
+### 1️⃣ Clone o Repositório  
+
+```bash
+git clone https://github.com/seu-usuario/nome-do-repositorio.git
+cd nome-do-repositorio
+```
+
+### 2️⃣ Instale as Dependências  
+
+```bash
+npm install
+```
+---
+
+## 🔧 Configuração do Banco de Dados  
+
+A aplicação usa **MongoDB** como banco de dados. Para rodar corretamente, você precisa criar um arquivo `.env` na raiz do projeto com a variável de ambiente:  
+
+```env
+DATABASE_URL="mongodb+srv://usuario:senha@cluster.mongodb.net/nome-do-banco"
+```
+
+📌 **Substitua** `usuario`, `senha` e `nome-do-banco` pelos seus dados reais do MongoDB.  
+
+Após isso, rode as migrações do Prisma:  
+
+```bash
+npm prisma db push
+```
+
+Caso tenha alguma dúvida, acesse a [documentação do Prisma](https://www.prisma.io/docs/getting-started/setup-prisma/start-from-scratch/mongodb/connect-your-database-node-mongodb)
+
+---
+
+## ▶️ Rodando a Aplicação  
+
+Para iniciar o projeto em modo de desenvolvimento:  
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+A aplicação estará disponível em:  
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+🔗 **http://localhost:3000**
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## 📌 Funcionalidades Implementadas  
 
-To learn more about Next.js, take a look at the following resources:
+✅ **Upload de documentos**  
+✅ **Conversão de texto via OCR (Tesseract.js)**  
+✅ **Banco de dados integrado com Prisma e MongoDB**  
+✅ **Deploy na Vercel**  
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🔜 Funcionalidades Futuras  
 
-## Deploy on Vercel
+🚧 **Autenticação de usuários**  
+🚧 **Integração com plataformas generativas**  
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## ❓ Dúvidas  
+
+Caso tenha qualquer dúvida ou precise de ajuda, estou disponível! 😃
+[E-mail](sabrinacberno@hotmail.com)
+[LinkedIn](https://www.linkedin.com/in/sabrina-caldas-berno/)
