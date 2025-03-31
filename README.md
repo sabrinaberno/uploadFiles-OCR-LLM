@@ -12,6 +12,7 @@ Este tutorial descreve como configurar e executar a aplicação localmente, alé
 - **MongoDB**  
 - **Tesseract.js** (OCR)  
 - **TailwindCSS**  
+- **OpenAI**
 - **Vercel** (Deploy)  
 
 ---
@@ -71,6 +72,7 @@ A aplicação estará disponível em:
 ✅ **Upload de documentos**  
 ✅ **Conversão de texto via OCR (Tesseract.js)**  
 ✅ **Banco de dados integrado com Prisma e MongoDB**  
+✅ **Integração com plataformas generativas - ChatGPT**  
 ✅ **Deploy na Vercel**  
 
 ---
@@ -78,7 +80,6 @@ A aplicação estará disponível em:
 ## 🔜 Funcionalidades Futuras  
 
 🚧 **Autenticação de usuários**  
-🚧 **Integração com plataformas generativas**  
 
 ---
 
