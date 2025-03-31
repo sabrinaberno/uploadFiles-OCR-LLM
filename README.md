@@ -33,7 +33,7 @@ npm install
 ```
 ---
 
-## 🔧 Configuração do Banco de Dados  
+## 🔧 Configuração do .env  
 
 A aplicação usa **MongoDB** como banco de dados. Para rodar corretamente, você precisa criar um arquivo `.env` na raiz do projeto com a variável de ambiente:  
 
@@ -50,6 +50,14 @@ npm prisma db push
 ```
 
 Caso tenha alguma dúvida, acesse a [documentação do Prisma](https://www.prisma.io/docs/getting-started/setup-prisma/start-from-scratch/mongodb/connect-your-database-node-mongodb)
+
+Além disso, a aplicação utiliza o **OpenAI** para se comunicar o usuário. 
+
+```env
+OPENAI_API_KEY="SUA_CHAVE_OPENAI"
+```
+
+📌 **Substitua** `SUA_CHAVE_OPENAI` pelos seus dados reais do OpenAI.  
 
 ---
 
