@@ -1,20 +1,7 @@
 "use server";
 
-import { prisma } from "../utils/prisma";
-
-export async function createbufferData(file: File): Promise<Buffer> {
-  const fileData = await file.arrayBuffer();
-  const bufferData = Buffer.from(fileData);
-
-  return bufferData;
-}
-
-export async function createBase64Data (file: Buffer): Promise<string> {
-  
-  const base64Data = file.toString("base64");
-
-  return base64Data;
-}
+import { createBase64Data, createbufferData } from "@/services/fileService";
+import { prisma } from "../../utils/prisma";
 
 export async function createFile(formData: FormData) {
   const file = formData.get("file-upload") as File;
@@ -47,3 +34,5 @@ export async function createFile(formData: FormData) {
     console.error("Erro ao criar o arquivo:", error);
   }
 }
+export { createbufferData };
+

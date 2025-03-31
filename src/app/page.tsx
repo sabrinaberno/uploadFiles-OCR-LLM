@@ -4,19 +4,23 @@ import { Pencil, Plus } from "lucide-react";
 import React, { useState } from "react";
 import { useForm} from "react-hook-form";
 import {useOcrWorker } from "../services/ocrService";
-import { createFile, createbufferData } from "../actions/fileActions";
+import { createFile, createbufferData } from "./actions/file";
 import FileUpload from "../components/FileUpload";
-
+import PromptForm from "../components/PromptForm";
+import { handleChatSubmit } from "./actions/chat"; 
 
 export default function Home() {
+
+  const { initializeWorker, recognizeText, terminateWorker } = useOcrWorker();
+  
   const [file, setFile] = useState<File | null>(null);
   const { handleSubmit } = useForm();
+  
   const [ orcResult, setOcrResult ] = useState(''); 
-  const { initializeWorker, recognizeText, terminateWorker } = useOcrWorker();
 
-  //const [progress,setProgress]=useState('')
-  //const [progressLabel,setProgressLabel]=useState('')
-
+  const [choices, setChoices] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  
   const handleFileSelect = (file: File) => {
     setFile(file);
   };
@@ -30,7 +34,7 @@ export default function Home() {
 
     const formData = new FormData();
     formData.append("filename", file.name);
-    formData.append("file-upload", file); // Usando o estado correto
+    formData.append("file-upload", file); 
 
     const base64Data = await createbufferData(file);
 
@@ -79,13 +83,6 @@ export default function Home() {
                   {file ? file.name : "Upload do Arquivo"}
                 </span>
               </label>
-              {/* <input
-                id="file-upload"
-                type="file"
-                className="hidden"
-                multiple={false}
-                //onChange={handleFileChange}
-              /> */}
               <FileUpload onFileSelect={handleFileSelect} />
             </div>
           </div>
@@ -113,25 +110,18 @@ export default function Home() {
           </div>
         </div>
       </div> }
-
-      {orcResult && <div className="grid gap-4 sm:grid-cols-2 sm:gap-6 mt-8">
-        <div className="sm:col-span-2">
-          <label
-            htmlFor="chat"
-            className="block text-sm font-medium leading-6 text-gray-900 mb-2"
-          >
-            Converse com o chat para tirar dúvidas sobre o seu documento
-          </label>
-          <div className="mt-2">
-            <input
-              type="text"
-              id="chat"
-              className="block w-full rounded-md border-0 py-2 px-4 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-purple-600 sm:text-sm sm:leading-6"
-              placeholder="Escreva aqui"
-            />
-          </div>
+     {orcResult && (
+        <div className="mt-8">
+          <label className="block text-sm font-medium leading-6 text-gray-900 mb-2">Converse com o chat sobre o documento</label>
+          <PromptForm isLoading={isLoading} onSubmit={(prompt: string) => handleChatSubmit(prompt, orcResult, setIsLoading, setChoices)} />
+          
+          {choices.map((choice, index) => (
+            <p className="mt-4 p-2 bg-gray-100 rounded-md" key={index}>
+              {choice}
+            </p>
+          ))}
         </div>
-      </div> }
+      )}
     </div>
   );
 }
