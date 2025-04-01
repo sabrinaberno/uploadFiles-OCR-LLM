@@ -53,8 +53,12 @@ export default function Home() {
     
     await handleChatSubmit(prompt, orcResult, setIsLoading, (newChoices) => {
       setChoices(newChoices);
-      setChatHistory((prev) => [...prev, { question: prompt, answer: newChoices[0] }]);
+      
+      if (Array.isArray(newChoices) && newChoices.length > 0) {
+        setChatHistory((prev) => [...prev, { question: prompt, answer: newChoices[0] }]);
+      }
     });
+    
   };
 
   return (
