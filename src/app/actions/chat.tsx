@@ -1,65 +1,68 @@
-import { prisma } from "../../utils/prisma";
+"use server";
+
+import { createChatInDB, fetchChatResponse } from "@/services/chatService";
 
 interface Choice {
-    message: {
-      content: string;
-    };
-  }
-  
-  interface ChatResponse {
-    choices: Choice[];
-  }
-  
-  export const handleChatSubmit = async (
-    // prompt: string,  
-    // orcResult: string, 
-    // setIsLoading: React.Dispatch<React.SetStateAction<boolean>>, 
-    // setChoices: React.Dispatch<React.SetStateAction<string[]>>,
-    // userId: string,
-    // fileId: string
-    prompt: string,  orcResult: string, setIsLoading: React.Dispatch<React.SetStateAction<boolean>>, setChoices: React.Dispatch<React.SetStateAction<string[]>>
-  ) => {
-    setIsLoading(true);
-
-    try {
-      const response = await fetch("../api", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt, orcResult }),
-      });
-  
-      const result: ChatResponse = await response.json();
-      setChoices(result.choices.map((choice) => choice.message.content));
-
-      // if (result.choices.length > 0) {
-      //   await saveChatHistory(prompt, result.choices[0].message.content, fileId, userId);
-      // }
-  
-    } catch (error) {
-      console.error("Erro ao enviar a pergunta:", error);
-
-    } finally {
-
-      setIsLoading(false);
-
-    }
+  message: {
+    content: string;
   };
-  
-  export async function saveChatHistory(prompt: string, answer: string, fileId: string, userId: string) {
-    try {
-      // Cria o histórico de chat no banco
-      const chat = await prisma.chatHistory.create({
-        data: {
-          question: prompt,
-          answer: answer,
-          fileId: fileId, // Associar ao arquivo
-          userId: userId, // Associar ao usuário
-        },
-      });
-  
-      console.log("Histórico de chat salvo:", chat);
-      return chat;
-    } catch (error) {
-      console.error("Erro ao salvar o histórico de chat:", error);
-    }
+}
+
+interface ChatResponse {
+  choices: Choice[];
+}
+
+export async function createChat(userId: string) {
+  console.log('Iniciando criação de chat para userId:', userId);
+
+  if (!userId) {
+    console.error("Usuário não encontrado");
+    return;
   }
+
+  return await createChatInDB(userId);
+}
+
+export async function handleChatSubmit(
+  prompt: string,
+  orcResult: string,
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
+  setChoices: React.Dispatch<React.SetStateAction<string[]>>
+) {
+  setIsLoading(true);
+  console.log("Conversa com o chat iniciada");
+
+  try {
+    const result: ChatResponse = await fetchChatResponse(prompt, orcResult);
+    
+    setChoices(result.choices.map((choice: Choice) => choice.message.content));
+
+  } catch (error) {
+    console.error("Erro ao processar resposta do chat:", error);
+  } finally {
+    setIsLoading(false);
+  }
+}
+
+
+// // // npx prisma studio
+
+
+
+// export async function saveChatHistory(chatId: string, question: string, answer: string) {
+//   try {
+//     const savedHistory = await prisma.chatHistory.create({
+//       data: {
+//         chatId,
+//         question,
+//         answer,
+//       },
+//     });
+
+//     console.log("Histórico salvo com sucesso:", savedHistory);
+//     return savedHistory;
+
+//   } catch (error) {
+//     console.error("Erro ao salvar histórico do chat:", error);
+//   }
+// }

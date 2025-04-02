@@ -1,11 +1,14 @@
 "use server";
 
-import { createBase64Data, createbufferData } from "@/services/fileService";
-import { prisma } from "../../utils/prisma";
+import { associateFileWithChat, createBase64Data, createbufferData, saveFile } from "../../services/fileService";
 
-//export async function createFile(formData: FormData, conversation: { question: string; answer: string }[], userId: string) {
-  export async function createFile(formData: FormData) {
-const file = formData.get("file-upload") as File;
+export async function createFile(
+  formData: FormData, 
+  chatId: string, 
+  ocrResult: string
+){
+
+  const file = formData.get("file-upload") as File;
   const filename = formData.get("filename") as string;
 
   if (!filename.trim() || !file) {
@@ -15,43 +18,19 @@ const file = formData.get("file-upload") as File;
 
   try {
     const bufferData = await createbufferData(file);
-
     const base64Data = await createBase64Data(bufferData);
 
     console.log("Arquivo recebido", filename, file.size);
 
-    // Armazena os dados do arquivo no banco de dados
-    // const savedFile = await prisma.file.create({
-    //   data: {
-    //     filename: filename,
-    //     data: base64Data,
-    //     size: file.size,
-    //     userId: userId,
-    //     chatHistory: {
-    //       create: conversation.map((chat) => ({
-    //         question: chat.question,
-    //         answer: chat.answer,
-    //         userId: userId,
-    //       })),
-    //     },
-    //   },
-    // });
+    const savedFile = await saveFile(filename, base64Data, file.size, ocrResult);
 
-    // return savedFile
-    await prisma.file.create({
-      data: {
-        filename: filename,
-        data: base64Data,
-        size: file.size,
-      },
-    });
-
-    return base64Data
+     // Associar o arquivo ao Chat
+     await associateFileWithChat(chatId, savedFile.fileId);
+    return savedFile
 
   } catch (error) {
     console.error("Erro ao criar o arquivo:", error);
   }
 }
 
-export { createbufferData };
 

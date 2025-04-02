@@ -14,25 +14,34 @@ datasource db {
 }
 
 
-model file {
-  id          String   @id @default(uuid()) @map("_id")
-  filename    String
-  data        String    // Armazenará os dados binários do arquivo
-  size        Int
-  createdAt   DateTime @default(now())
-  // userId      String?
+model File {
+  fileId    String   @id @default(uuid()) @map("_id")
+  filename  String
+  data      String  // Armazena os dados binários do arquivo
+  size      Int
+  ocr       String
+  createdAt DateTime @default(now())
 
-  // chatHistory chatHistory[]
+  Chat Chat[]
 }
 
-model chatHistory {
-  id          String   @id @default(uuid()) @map("_id")
-  userId      String  
-  fileId      String   
-  question    String   
-  answer      String   
-  createdAt   DateTime @default(now())
+model ChatHistory {
+  chatHistoryId String   @id @default(uuid()) @map("_id")
+  chatId        String   
+  question      String   
+  answer        String   
+  createdAt     DateTime @default(now())
+
+  // Relacionamento com Chat (muitos para um)
+  Chat Chat @relation(fields: [chatId], references: [chatId])
+}
+
+model Chat {
+  chatId    String   @id @default(uuid()) @map("_id")
+  userId    String
   
-  // Relacionamento com o arquivo
-  //file        file     @relation(fields: [fileId], references: [id])
+  fileId    String?  @unique  // Chat pode ou não ter um arquivo
+  File      File?    @relation(fields: [fileId], references: [fileId])
+
+  ChatHistory ChatHistory[]
 }
