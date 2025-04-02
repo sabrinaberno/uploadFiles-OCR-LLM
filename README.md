@@ -46,7 +46,7 @@ DATABASE_URL="mongodb+srv://usuario:senha@cluster.mongodb.net/nome-do-banco"
 Após isso, rode as migrações do Prisma:  
 
 ```bash
-npm prisma db push
+npx prisma generate
 ```
 
 Caso tenha alguma dúvida, acesse a [documentação do Prisma](https://www.prisma.io/docs/getting-started/setup-prisma/start-from-scratch/mongodb/connect-your-database-node-mongodb)

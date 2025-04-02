@@ -3,12 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
   },
   "dependencies": {
+    "@clerk/nextjs": "^6.12.12",
     "@prisma/client": "^6.5.0",
     "@uploadthing/react": "^7.3.0",
     "lucide-react": "^0.484.0",
@@ -17,6 +18,7 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.54.2",
+    "tailwind-merge": "^3.1.0",
     "tesseract.js": "^6.0.0"
   },
   "devDependencies": {

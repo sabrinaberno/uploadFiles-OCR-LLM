@@ -20,4 +20,19 @@ model file {
   data        String    // Armazenará os dados binários do arquivo
   size        Int
   createdAt   DateTime @default(now())
+  // userId      String?
+
+  // chatHistory chatHistory[]
+}
+
+model chatHistory {
+  id          String   @id @default(uuid()) @map("_id")
+  userId      String  
+  fileId      String   
+  question    String   
+  answer      String   
+  createdAt   DateTime @default(now())
+  
+  // Relacionamento com o arquivo
+  //file        file     @relation(fields: [fileId], references: [id])
 }
