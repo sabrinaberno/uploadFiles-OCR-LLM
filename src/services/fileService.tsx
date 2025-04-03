@@ -7,13 +7,13 @@ export async function createbufferData(file: File): Promise<Buffer> {
     return bufferData;
   }
   
-  export async function createBase64Data (file: Buffer): Promise<string> {
-    
-    const base64Data = file.toString("base64");
+export async function createBase64Data (file: Buffer): Promise<string> {
   
-    return base64Data;
-  }
-  
+  const base64Data = file.toString("base64");
+
+  return base64Data;
+}
+
 
 export async function saveFile(filename: string, base64Data: string, size: number, ocrResult: string) {
   return await prisma.file.create({
