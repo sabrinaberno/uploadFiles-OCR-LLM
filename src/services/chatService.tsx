@@ -1,23 +1,11 @@
 import { prisma } from "@/utils/prisma";
 import { ChatResponse, handleChatSubmit } from "../app/actions/chat"; 
-import axios from 'axios'
 
 export async function createChatInDB(userId: string) {
   try {
     return await prisma.chat.create({ data: { userId } });
   } catch (error) {
     console.error("Erro ao criar novo chat:", error);
-    throw error;
-  }
-}
-
-export async function fetchChatResponse(prompt: string, orcResult: string) {
-  try {
-    const response = await axios.post('/api/chatResponse',{prompt, orcResult })
-    console.log({axiosResponse:response})
-    return await response;
-  } catch (error) {
-    console.error("Erro ao enviar a pergunta:", error);
     throw error;
   }
 }
@@ -55,3 +43,4 @@ export async function handleChatInteraction(
 
   } 
 }
+

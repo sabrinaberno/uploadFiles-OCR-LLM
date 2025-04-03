@@ -11,6 +11,7 @@ import {
   UserButton,
   useUser,
 } from "@clerk/nextjs";
+import { Chat, ChatHistory } from "@prisma/client";
 
 import axios from "axios";
 import Button from "../components/Button";
@@ -21,6 +22,7 @@ import { createChat } from "./actions/chat";
 import FileUpload from "../components/FileUpload";
 import PromptForm from "../components/PromptForm";
 import { handleChatInteraction } from "@/services/chatService";
+import DrawerMenu from "@/components/DrawerList";
 
 export default function Home() {
   const { initializeWorker, recognizeText, terminateWorker } = useOcrWorker();
@@ -35,6 +37,7 @@ export default function Home() {
     { question: string; answer: string; chatId?: string }[]
   >([]);
   const [chatId, setChatId] = useState<string | null>(null);
+  const [chatList, setChatList] = useState<Record<string, Chat & { ChatHistory: ChatHistory[] }>>({});
 
   const { user } = useUser();
 
@@ -58,7 +61,7 @@ export default function Home() {
       console.error("Erro ao enviar a pergunta:", error);
     }
   };
-
+  
   const onSubmit = async () => {
     if (!file) {
       alert("Por favor, selecione um arquivo antes de enviar.");
@@ -92,16 +95,6 @@ export default function Home() {
     terminateWorker();
   };
 
-
-  // const requestApi = async () => {
-  //   try {
-  //     const result = await axios.post("/api/chatResponse", { oi: "oi" });
-  //     console.log({ thisaxiosresult: result });
-  //   } catch (error) {
-  //     console.log({ ERRO: error });
-  //   }
-  // };
-
   const handleFileSelect = (file: File) => {
     setFile(file);
 
@@ -110,19 +103,53 @@ export default function Home() {
     setChatId(null);
   };
 
-  const startNewChat = () => {
-    setChatId(null);
-    setOcrResult("");
-    setChatHistory([]);
-    setFile(null);
-  };
+  const getChatList = async (userId: string) =>{
+    if (!userId) {
+      console.error("UserId não definido.");
+      return;
+    }
 
+      try {
+        const { data } = await axios.get(`/api/chatResponse?userId=${userId}`);
+        console.log("Chats recebidos:", data);
+        setChatList(data); 
+
+      } catch (error) {
+        console.error("Erro ao buscar os chats:", error);
+      }
+  }
+
+   useEffect(() => {
+    if (user) {
+      getChatList(user.id);
+    }
+    }, [user]);
+
+  useEffect(() => {
+    console.log({chatId})
+    if (chatId ) {
+      setChatHistory(chatList[chatId].ChatHistory);
+      console.log({AAAAAAAA:chatList[chatId]})
+    } else {
+      setChatHistory([]);
+    }
+  }, [chatId, chatList]);
+  useEffect(() => {
+      console.log(chatHistory)
+  
+    
+  }, [chatHistory]);
   return (
     <>
-      <div className="flex justify-between items-center p-1">
-        <Button type="submit" className="m-3" onClick={startNewChat}>
-          Novo Chat
-        </Button>
+  
+      <div className="flex justify-between items-center p-2">
+      <DrawerMenu 
+        chatList={chatList} 
+        setChatId={setChatId} 
+        setOcrResult={setOcrResult} 
+        setChatHistory={setChatHistory} 
+        setFile={setFile} 
+      />
         <SignedOut>
           <SignInButton>
             <Button type="submit" className="m-3 bg-gray-500 hover:bg-gray-600">
@@ -188,7 +215,8 @@ export default function Home() {
             <div className="p-3 bg-gray-100 rounded-md text-sm f">
               {orcResult}
             </div>
-
+          </div>
+          )}
             <div className="mt-8">
               <div className="mt-4 space-y-2 mb-8 text-sm">
                 {chatHistory.map((chat, index) => (
@@ -201,7 +229,7 @@ export default function Home() {
                 ))}
               </div>
               <label className="block font-medium leading-6 text-purple-900 mb-2">
-                Converse com o chat sobre o documento
+                Converse com o chat
               </label>
               <PromptForm
                 isLoading={isLoading}
@@ -216,8 +244,7 @@ export default function Home() {
               />
             </div>
           </div>
-        )}
-      </div>
     </>
   );
 }
+
