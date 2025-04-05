@@ -27,12 +27,13 @@ export async function saveChatHistoryInDB(chatId: string, question: string, answ
 
 export async function handleChatInteraction(
   prompt: string,
-  chatId: string,
+  chatId: string  | undefined,
   chatResponse: ChatResponse,
   setChatHistory: React.Dispatch<React.SetStateAction<{ question: string; answer: string; }[]>>
 ) {
 
   try {
+
     const choices = await handleChatSubmit(prompt,chatId,chatResponse);
     const answer = choices[0] || "Nenhuma resposta disponível"; 
 

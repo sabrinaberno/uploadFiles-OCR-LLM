@@ -25,17 +25,19 @@ export async function createChat(userId: string) {
 
 export async function handleChatSubmit(
   prompt: string,
-  chatId: string,
+  chatId: string | undefined,
   chatResponse:ChatResponse
 ): Promise<string[]> {
   console.log("Conversa com o chat iniciada");
   
   try {
     const choices = chatResponse.choices.map((choice) => choice.message.content);
+    
+    if(chatId){
+      await saveChatHistoryInDB(chatId, prompt, choices[0] || "Nenhuma resposta disponível");
+    }
 
-    await saveChatHistoryInDB(chatId, prompt, choices[0] || "Nenhuma resposta disponível");
     return choices;
-
   } catch (error) {
     console.error("Erro ao processar resposta do chat:", error);
     return ["Ocorreu um erro ao obter a resposta do chat."];

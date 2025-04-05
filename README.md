@@ -22,8 +22,8 @@ Este tutorial descreve como configurar e executar a aplicação localmente, alé
 ### 1️⃣ Clone o Repositório  
 
 ```bash
-git clone https://github.com/seu-usuario/nome-do-repositorio.git
-cd nome-do-repositorio
+git clone https://github.com/sabrinaberno/uploadFiles-OCR-LLM 
+cd uploadFiles-OCR-LLM
 ```
 
 ### 2️⃣ Instale as Dependências  
@@ -35,13 +35,27 @@ npm install
 
 ## 🔧 Configuração do .env  
 
-A aplicação usa **MongoDB** como banco de dados. Para rodar corretamente, você precisa criar um arquivo `.env` na raiz do projeto com a variável de ambiente:  
+A aplicação utiliza **MongoDB** como banco de dados, **OpenAI** para comunicação com o usuário e **Clerk** para autenticação. Para garantir o funcionamento correto, crie um arquivo .env na raiz do projeto e adicione as seguintes variáveis de ambiente:
 
+# Banco de Dados (MongoDB)
 ```env
 DATABASE_URL="mongodb+srv://usuario:senha@cluster.mongodb.net/nome-do-banco"
 ```
+# OpenAI (Inteligência Artificial)
+```env
+OPENAI_API_KEY="SUA_CHAVE_OPENAI"
+```
 
-📌 **Substitua** `usuario`, `senha` e `nome-do-banco` pelos seus dados reais do MongoDB.  
+# Clerk (Autenticação)
+```env
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="SUA_CHAVE_PUBLICA_CLERK"
+CLERK_SECRET_KEY="SUA_CHAVE_SECRETA_CLERK"
+```
+
+📌 **Substitua** 
+- `usuario`, `senha` e `nome-do-banco` pelos seus dados reais do MongoDB.  
+- `SUA_CHAVE_OPENAI` pela sua chave de API do OpenAI.
+- `SUA_CHAVE_PUBLICA_CLERK` e `SUA_CHAVE_SECRETA_CLERK` pelas chaves da sua conta Clerk.
 
 Após isso, rode as migrações do Prisma:  
 
@@ -51,15 +65,6 @@ npx prisma generate
 
 Caso tenha alguma dúvida, acesse a [documentação do Prisma](https://www.prisma.io/docs/getting-started/setup-prisma/start-from-scratch/mongodb/connect-your-database-node-mongodb)
 
-Além disso, a aplicação utiliza o **OpenAI** para se comunicar o usuário. 
-
-```env
-OPENAI_API_KEY="SUA_CHAVE_OPENAI"
-```
-
-📌 **Substitua** `SUA_CHAVE_OPENAI` pelos seus dados reais do OpenAI.  
-
----
 
 ## ▶️ Rodando a Aplicação  
 
@@ -81,13 +86,18 @@ A aplicação estará disponível em:
 ✅ **Conversão de texto via OCR (Tesseract.js)**  
 ✅ **Banco de dados integrado com Prisma e MongoDB**  
 ✅ **Integração com plataformas generativas - ChatGPT**  
+✅ **Visualização de históricos de conversa**  
+✅ **Autenticação de usuários com Clerk**
 ✅ **Deploy na Vercel**  
 
 ---
 
 ## 🔜 Funcionalidades Futuras  
 
-🚧 **Autenticação de usuários**  
+🚧 **Melhoria na experiência do usuário (UI/UX)**
+🚧 **Suporte para múltiplos formatos de documentos**
+🚧 **Testes**
+🚧 **Visualização do histórico de documentos enviados**
 
 ---
 

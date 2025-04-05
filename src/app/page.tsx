@@ -1,68 +1,82 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
-import { Pencil, Plus } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import {
-  SignInButton,
-  SignedIn,
-  SignedOut,
-  UserButton,
-  useUser,
-} from "@clerk/nextjs";
+import axios from "axios";
+import { Pencil, Plus } from "lucide-react";
+
+// Autenticação
+import { SignInButton, SignedIn, SignedOut, UserButton, useUser} from "@clerk/nextjs";
+
+// Tipos
 import { Chat, ChatHistory } from "@prisma/client";
 
-import axios from "axios";
-import Button from "../components/Button";
-import { useOcrWorker } from "../services/ocrService";
-import { createbufferData } from "../services/fileService";
-import { createFile } from "./actions/file";
-import { createChat } from "./actions/chat";
-import FileUpload from "../components/FileUpload";
-import PromptForm from "../components/PromptForm";
+// Serviços
+import { useOcrWorker } from "@/services/ocrService";
+import { createbufferData } from "@/services/fileService";
 import { handleChatInteraction } from "@/services/chatService";
+
+// Ações
+import { createFile } from "@/app/actions/file";
+import { createChat } from "@/app/actions/chat";
+
+// Componentes
+import Button from "@/components/Button";
+import FileUpload from "@/components/FileUpload";
+import PromptForm from "@/components/PromptForm";
 import DrawerMenu from "@/components/DrawerList";
+
 
 export default function Home() {
   const { initializeWorker, recognizeText, terminateWorker } = useOcrWorker();
-
-  const [file, setFile] = useState<File | null>(null);
   const { handleSubmit } = useForm();
-
-  const [orcResult, setOcrResult] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-
-  const [chatHistory, setChatHistory] = useState<
-    { question: string; answer: string; chatId?: string }[]
-  >([]);
-  const [chatId, setChatId] = useState<string | null>(null);
-  const [chatList, setChatList] = useState<Record<string, Chat & { ChatHistory: ChatHistory[] }>>({});
-
   const { user } = useUser();
 
+  const [file, setFile] = useState<File | null>(null);
+  const [orcResult, setOcrResult] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [chatId, setChatId] = useState<string | null>(null);
+  const [chatHistory, setChatHistory] = useState<{ question: string; answer: string; chatId?: string }[]>([]);
+  const [chatList, setChatList] = useState<Record<string, Chat & { ChatHistory: ChatHistory[] }>>({});
+
+  // Cria um novo chat para o usuário autenticado e salva seu chatId
+  const getUserId = async (): Promise<string | undefined> => {
+    if (user) {
+      console.log("Usuário autenticado:", user.id);
+      const newChat = await createChat(user.id);
+  
+      if (!newChat) {
+        alert("Erro ao criar o chat. Tente novamente.");
+        return;
+      }
+  
+      setChatId(newChat.chatId); 
+      return newChat.chatId;     
+    }  
+  };
+
+  // Envia uma interação para o chat
   const onSubmitChatInteraction = async (
     prompt: string,
     chatId: string | null,
     orcResult: string,
     setChatHistory: { (value: React.SetStateAction<{ question: string; answer: string; chatId?: string | undefined; }[]>): void; (value: React.SetStateAction<{ question: string; answer: string; }[]>): void; }
   ) => {
-    if (!chatId) {
-      console.error("ChatId não definido.");
-      return;
-    }
     try {
       const {data} = await axios.post("/api/chatResponse", {
         prompt,
         orcResult,
       });
-      handleChatInteraction(prompt,chatId,data,setChatHistory)
+
+      handleChatInteraction(prompt, chatId ?? undefined, data,setChatHistory)
     } catch (error) {
       console.error("Erro ao enviar a pergunta:", error);
     }
   };
   
-  const onSubmit = async () => {
+  // Processa o envio do arquivo
+  const onSubmitFile = async () => {
     if (!file) {
       alert("Por favor, selecione um arquivo antes de enviar.");
       return;
@@ -77,24 +91,17 @@ export default function Home() {
     const text = await recognizeText(bufferData);
     setOcrResult(text);
 
-    if (user) {
-      console.log("Usuário autenticado:", user.id);
-      const newChat = await createChat(user.id);
+    const newChatId = await getUserId();
 
-      if (!newChat) {
-        alert("Erro ao criar o chat. Tente novamente.");
-        return;
-      }
-
-      setChatId(newChat.chatId);
-
-      await createFile(formData, newChat.chatId, text);
-      alert("Arquivo enviado!");
+    if (newChatId) {
+      await createFile(formData, newChatId, text); 
     }
-
+    
+    alert("Arquivo enviado!");
     terminateWorker();
   };
 
+  // Atualiza o arquivo selecionado
   const handleFileSelect = (file: File) => {
     setFile(file);
 
@@ -103,6 +110,7 @@ export default function Home() {
     setChatId(null);
   };
 
+  // Busca a lista de chats do usuário
   const getChatList = async (userId: string) =>{
     if (!userId) {
       console.error("UserId não definido.");
@@ -119,29 +127,24 @@ export default function Home() {
       }
   }
 
+   // Carrega a lista de chats quando o usuário muda
    useEffect(() => {
-    if (user) {
-      getChatList(user.id);
-    }
+    if (user) {getChatList(user.id);}
     }, [user]);
 
-  useEffect(() => {
-    console.log({chatId})
-    if (chatId ) {
-      setChatHistory(chatList[chatId].ChatHistory);
-      console.log({AAAAAAAA:chatList[chatId]})
-    } else {
-      setChatHistory([]);
-    }
-  }, [chatId, chatList]);
-  useEffect(() => {
-      console.log(chatHistory)
+    // Atualiza o histórico de chat quando o chatId muda
+    useEffect(() => {
+      if (chatId && chatList && chatList[chatId]?.ChatHistory) {
+        setChatHistory(chatList[chatId].ChatHistory);
+      } else {
+        setChatHistory([]);
+      }
+    }, [chatId, chatList]);
   
-    
-  }, [chatHistory]);
+
   return (
     <>
-  
+      {/* Menu Superior */}
       <div className="flex justify-between items-center p-2">
       <DrawerMenu 
         chatList={chatList} 
@@ -162,11 +165,15 @@ export default function Home() {
           <UserButton />
         </SignedIn>
       </div>
+
+      {/* Container Principal */}
       <div className="w-full max-w-3xl p-8 my-16 bg-white border border-gray-200 rounded-lg shadow mx-auto">
         <h2 className="text-4xl text-center font-semibold py-8">
           Chat w/ File Upload
         </h2>
-        <form onSubmit={handleSubmit(onSubmit)}>
+
+        {/* Formulário de Upload */}
+        <form onSubmit={handleSubmit(onSubmitFile)}>
           <div className="grid gap-4 sm:grid-cols-2 sm:gap-6">
             <div className="col-span-full">
               <div className="flex justify-between items-center mb-4">
@@ -186,6 +193,7 @@ export default function Home() {
                 )}
               </div>
 
+              {/* Área de Upload */}
               <div className="flex justify-center items-center">
                 <label
                   htmlFor="file-upload"
@@ -207,6 +215,7 @@ export default function Home() {
           </Button>
         </form>
 
+        {/* Exibição do Resultado OCR */}
         {orcResult && (
           <div className="mt-8">
             <label className="block font-medium leading-6 text-purple-900 mb-2">
@@ -231,6 +240,8 @@ export default function Home() {
               <label className="block font-medium leading-6 text-purple-900 mb-2">
                 Converse com o chat
               </label>
+
+              {/* Chat */}
               <PromptForm
                 isLoading={isLoading}
                 onSubmit={(prompt: string) =>
